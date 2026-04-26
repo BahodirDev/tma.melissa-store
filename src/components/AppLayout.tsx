@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { authApi } from "../api/routes";
 import { unwrapError } from "../api/client";
 import { LoadingBlock } from "./m/LoadingBlock";
+import SellModal from "./SellModal";
 
 const NAV = [
   { to: "/statistics", label: "Statistika", icon: "▣" },
@@ -23,6 +24,7 @@ export default function AppLayout() {
   const { user, logout } = useAuth();
   const { pathname } = useLocation();
   const [drawer, setDrawer] = useState(false);
+  const [sellOpen, setSellOpen] = useState(false);
   const [apiOk, setApiOk] = useState<boolean | null>(null);
 
   const closeDrawer = useCallback(() => setDrawer(false), []);
@@ -32,6 +34,8 @@ export default function AppLayout() {
     // Marshrut o‘zgaganda (orqaga / link) yon menyu yopilishi.
     // eslint-disable-next-line react-hooks/set-state-in-effect -- bitta UI qadami: surib chiqilgan drawer
     setDrawer(false);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sotish modali bitta sahifada qoladi
+    setSellOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -154,6 +158,7 @@ export default function AppLayout() {
           <Outlet />
         </Suspense>
       </div>
+      <SellModal open={sellOpen} onOpenChange={setSellOpen} />
     </div>
   );
 }

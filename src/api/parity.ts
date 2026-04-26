@@ -2,6 +2,7 @@ import { api } from "./client";
 import type {
   GoodsRow,
   JsonObject,
+  ProductListRow,
   ProductsListResponse,
   ReportListResponse,
 } from "../types/api-responses";
@@ -142,4 +143,48 @@ export async function postGoodsSearch(
     { ...body, search: s }
   );
   return Array.isArray(data) ? data : [];
+}
+
+/** Roʻyxat — front: `get(/products/products-by-storeid/${id})` */
+export async function getProductsByStoreId(
+  storeId: string
+): Promise<ProductListRow[]> {
+  const { data } = await api.get<ProductListRow[] | unknown>(
+    U(`products/products-by-storeid/${storeId}`)
+  );
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getProductsByStoreAndDeliver(
+  storeId: string,
+  deliverId: string
+): Promise<ProductListRow[]> {
+  const { data } = await api.get<ProductListRow[] | unknown>(
+    U(
+      `products/products-by-params?store_id=${encodeURIComponent(storeId)}&deliver_id=${encodeURIComponent(deliverId)}`
+    )
+  );
+  return Array.isArray(data) ? data : [];
+}
+
+export type ProductSaleLine = {
+  product_id: string;
+  count: number;
+  client: string;
+  client_nomer: string;
+  client_id: string;
+  cost: number;
+  price: number;
+  code: string;
+  store_id: string;
+  currency_amount: number;
+  each_box_count: number;
+};
+
+export async function patchProductsSale(body: { products: ProductSaleLine[] }) {
+  const { data } = await api.patch<{
+    data?: unknown;
+    report_id?: string;
+  }>(U("products/products-sale"), body);
+  return data;
 }

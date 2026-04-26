@@ -723,3 +723,142 @@ a {
   color: var(--text-color);
   font-weight: 600;
 }
+
+/* Sotish modali: front-dagi `SellDebt` kabi yonlama, doim DOMda (yopiqda yashirin) */
+.m-sell-fab {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right, 0));
+  bottom: max(0.9rem, calc(0.5rem + var(--safe)));
+  z-index: 180;
+  width: 3.1rem;
+  height: 3.1rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-button);
+  color: var(--white);
+  font-size: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.m-sell-fab__plus {
+  font-size: 1.6rem;
+  line-height: 1;
+  font-weight: 300;
+}
+.m-sell-fab:hover {
+  filter: brightness(1.05);
+}
+.m-sell-fab:focus-visible {
+  outline: 2px solid var(--color-info);
+  outline-offset: 2px;
+}
+
+.m-sell-root {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+  visibility: hidden;
+}
+.m-sell-root--open {
+  pointer-events: auto;
+  visibility: visible;
+}
+.m-sell-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+.m-sell-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 92dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+.m-sell-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+.m-sell-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.m-sell-form {
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
+}
+.m-sell-form .field {
+  margin: 0;
+}
+.m-sell-foot {
+  padding: 0.75rem 1rem calc(0.85rem + var(--safe));
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.m-sell-total {
+  font-weight: 600;
+  margin-right: auto;
+  font-size: 0.95rem;
+}
+.m-sell-cart {
+  list-style: none;
+  margin: 0;
+  padding: 0 1rem 0.5rem;
+  overflow: auto;
+  max-height: 28dvh;
+}
+.m-sell-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+}
+.m-sell-line--warn {
+  background: rgba(255, 193, 7, 0.12);
+  margin: 0 -0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  border-radius: var(--radius-sm);
+}
+.m-sell-panel .h3 {
+  margin: 0.25rem 1rem 0.25rem;
+  flex-shrink: 0;
+}
+.m-sell-panel .error {
+  margin: 0.5rem 1rem 0;
+}
+.m-sell-panel .m-loading,
+.m-sell-panel .m-loading__inner {
+  margin: 0.5rem 1rem;
+  min-height: 2.5rem;
+}

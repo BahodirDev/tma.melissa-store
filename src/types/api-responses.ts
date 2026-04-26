@@ -21,6 +21,7 @@ export type ProductListRow = {
   currency_id?: ProductNestedCurrency | string;
   products_count?: string | number;
   products_count_price?: string | number;
+  products_count_cost?: string | number;
   products_box_count?: string | number;
   each_box_count?: string | number;
   actual_count?: string | number;
