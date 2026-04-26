@@ -1,17 +1,27 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, unwrapError } from "../api/client";
+import type { DebtTransactionRow } from "../types/api-responses";
+import { MobileCard } from "../components/m/MobileCard";
+import { SectionHeader } from "../components/m/SectionHeader";
+import { LoadingBlock } from "../components/m/LoadingBlock";
+import { ErrorBanner } from "../components/m/ErrorBanner";
+import { EmptyState } from "../components/m/EmptyState";
+import { formatDate, formatNumber } from "../utils/format";
+import { formatTransactionType } from "../utils/fieldLabels";
 
 export default function DebtsPage() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<unknown>(null);
+  const [rows, setRows] = useState<DebtTransactionRow[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setErr(null);
     try {
-      const r = await api.get("debts/debts-list");
-      setData(r.data);
+      const r = await api.get<DebtTransactionRow[] | unknown>("debts/debts-list");
+      setRows(
+        Array.isArray(r.data) ? (r.data as DebtTransactionRow[]) : []
+      );
     } catch (e) {
       setErr(unwrapError(e));
     }
@@ -24,13 +34,43 @@ export default function DebtsPage() {
 
   return (
     <div className="page">
-      <h2>Qarzlar (eslatma)</h2>
-      <button className="btn btn--sm" type="button" onClick={() => void load()}>
-        Yangilash
-      </button>
-      {err ? <p className="err">{err}</p> : null}
-      {loading ? <p className="muted">Yuklanmoqda…</p> : null}
-      <pre className="pre">{data ? JSON.stringify(data, null, 2) : "—"}</pre>
+      <SectionHeader
+        title="Qarz eslatmalar"
+        action={
+          <button
+            className="btn btn--sm btn--secondary"
+            type="button"
+            onClick={() => void load()}
+          >
+            Yangilash
+          </button>
+        }
+      />
+      {err ? <ErrorBanner message={err} /> : null}
+      {loading ? <LoadingBlock /> : null}
+      {rows.length === 0 && !loading ? <EmptyState text="Yozuvlar yo‘q" /> : null}
+      {rows.map((r, i) => (
+        <MobileCard key={r.transaction_id || i}>
+          <div className="m-list-item__head">
+            <h3 className="m-list-item__title">
+              {formatNumber(r.transaction_money as number)} soʻm
+            </h3>
+            <span className="m-badge">
+              {formatTransactionType(
+                r.transaction_type != null ? String(r.transaction_type) : null
+              )}
+            </span>
+          </div>
+          {r.transaction_summary ? (
+            <p className="m-list-item__meta m-list-item__meta--stack">
+              {r.transaction_summary}
+            </p>
+          ) : null}
+          {r.transaction_created_at ? (
+            <p className="m-list-item__meta">{formatDate(r.transaction_created_at as string)}</p>
+          ) : null}
+        </MobileCard>
+      ))}
     </div>
   );
 }

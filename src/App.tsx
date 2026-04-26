@@ -1,18 +1,21 @@
+import { lazy } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import AppLayout from "./components/AppLayout";
 import Login from "./pages/Login";
-import Statistics from "./pages/Statistics";
-import Products from "./pages/Products";
-import Reports from "./pages/Reports";
-import ReturnPage from "./pages/ReturnPage";
-import StorePage from "./pages/StorePage";
-import DeliverPage from "./pages/DeliverPage";
-import DebtsPage from "./pages/DebtsPage";
-import Currency from "./pages/Currency";
-import Employees from "./pages/Employees";
-import Clients from "./pages/Clients";
+
+const Statistics = lazy(() => import("./pages/Statistics"));
+const Products = lazy(() => import("./pages/Products"));
+const Reports = lazy(() => import("./pages/Reports"));
+const ReturnPage = lazy(() => import("./pages/ReturnPage"));
+const StorePage = lazy(() => import("./pages/StorePage"));
+const DeliverPage = lazy(() => import("./pages/DeliverPage"));
+const DebtsPage = lazy(() => import("./pages/DebtsPage"));
+const Currency = lazy(() => import("./pages/Currency"));
+const Employees = lazy(() => import("./pages/Employees"));
+const Clients = lazy(() => import("./pages/Clients"));
+const Categories = lazy(() => import("./pages/Categories"));
 
 export default function App() {
   return (
@@ -31,6 +34,7 @@ export default function App() {
             <Route index element={<Navigate to="/statistics" replace />} />
             <Route path="statistics" element={<Statistics />} />
             <Route path="products" element={<Products />} />
+            <Route path="categories" element={<Categories />} />
             <Route path="reports" element={<Reports />} />
             <Route path="return" element={<ReturnPage />} />
             <Route path="store" element={<StorePage />} />

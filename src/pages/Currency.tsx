@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { currencyApi, unwrapError } from "../api/routes";
 import type { CurrencyRow } from "../types/api";
+import { SectionHeader } from "../components/m/SectionHeader";
+import { PageSearchRow } from "../components/m/PageSearchRow";
+import { MobileCard } from "../components/m/MobileCard";
+import { ErrorBanner } from "../components/m/ErrorBanner";
+import { LoadingBlock } from "../components/m/LoadingBlock";
+import { EmptyState } from "../components/m/EmptyState";
+import { currencyFormLabels } from "../utils/fieldLabels";
 
 export default function CurrencyPage() {
   const [list, setList] = useState<CurrencyRow[]>([]);
@@ -105,42 +112,50 @@ export default function CurrencyPage() {
 
   return (
     <div className="page">
-      <h2>Valyuta</h2>
-      <div className="row row--wrap">
-        <input
-          className="input"
-          placeholder="Qidiruv (nom bo‘yicha)"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-        <button className="btn btn--sm" type="button" onClick={() => void load()}>
-          Yangilash
-        </button>
-      </div>
-      {err ? <p className="err">{err}</p> : null}
-      {loading ? <p className="muted">Yuklanmoqda…</p> : null}
-      <ul className="list">
-        {list.map((c) => (
-          <li key={c.currency_id} className="li card">
-            <div>
-              <strong>{c.currency_name}</strong> {c.currency_code} ({c.currency_symbol}) —{" "}
-              {c.currency_amount}
-            </div>
-            <div className="row">
-              <button type="button" className="btn btn--sm" onClick={() => startEdit(c)}>
-                Tahrir
-              </button>
-              <button
-                type="button"
-                className="btn btn--sm btn--danger"
-                onClick={() => void onDelete(c.currency_id)}
-              >
-                O‘chir
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <SectionHeader
+        title="Pul birliklar (valyuta)"
+        action={
+          <button
+            className="btn btn--sm btn--secondary"
+            type="button"
+            onClick={() => void load()}
+          >
+            Yangilash
+          </button>
+        }
+      />
+      <PageSearchRow
+        value={q}
+        onChange={setQ}
+        placeholder="Qidiruv (nom bo‘yicha)"
+      />
+      {err ? <ErrorBanner message={err} /> : null}
+      {loading ? <LoadingBlock /> : null}
+      {list.length === 0 && !loading ? <EmptyState text="Valyuta topilmadi" /> : null}
+      {list.map((c) => (
+        <MobileCard key={c.currency_id}>
+          <h3 className="m-list-item__title">{c.currency_name}</h3>
+          <p className="m-list-item__meta">
+            {c.currency_code} ({c.currency_symbol}) — {c.currency_amount}
+          </p>
+          <div className="m-card__actions">
+            <button
+              type="button"
+              className="btn btn--sm"
+              onClick={() => startEdit(c)}
+            >
+              Tahrir
+            </button>
+            <button
+              type="button"
+              className="btn btn--sm btn--danger"
+              onClick={() => void onDelete(c.currency_id)}
+            >
+              O‘chir
+            </button>
+          </div>
+        </MobileCard>
+      ))}
 
       {!editing ? (
         <form className="form" onSubmit={onCreate}>
@@ -148,7 +163,7 @@ export default function CurrencyPage() {
           {(["currency_name", "currency_code", "currency_symbol", "name", "flag"] as const).map(
             (k) => (
               <label key={k} className="field">
-                <span>{k}</span>
+                <span>{currencyFormLabels[k]}</span>
                 <input
                   className="input"
                   value={String(form[k] ?? "")}
@@ -158,7 +173,7 @@ export default function CurrencyPage() {
             )
           )}
           <label className="field">
-            <span>currency_amount</span>
+            <span>{currencyFormLabels.currency_amount}</span>
             <input
               type="number"
               className="input"
@@ -178,7 +193,7 @@ export default function CurrencyPage() {
           {(["currency_name", "currency_code", "currency_symbol", "name", "flag"] as const).map(
             (k) => (
               <label key={k} className="field">
-                <span>{k}</span>
+                <span>{currencyFormLabels[k]}</span>
                 <input
                   className="input"
                   value={String(form[k] ?? "")}
@@ -188,7 +203,7 @@ export default function CurrencyPage() {
             )
           )}
           <label className="field">
-            <span>currency_amount</span>
+            <span>{currencyFormLabels.currency_amount}</span>
             <input
               type="number"
               className="input"

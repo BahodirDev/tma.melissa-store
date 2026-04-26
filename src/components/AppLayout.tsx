@@ -1,26 +1,38 @@
-import { useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { authApi } from "../api/routes";
 import { unwrapError } from "../api/client";
+import { LoadingBlock } from "./m/LoadingBlock";
 
-const nav = [
-  { to: "/statistics", label: "Stat" },
-  { to: "/products", label: "Mahsulot" },
-  { to: "/reports", label: "Hisobot" },
-  { to: "/return", label: "Qayt." },
-  { to: "/store", label: "Ombor" },
-  { to: "/deliver", label: "Post." },
-  { to: "/debts", label: "Qarz" },
-  { to: "/currency", label: "Valyuta" },
-  { to: "/users", label: "Xodim" },
-  { to: "/clients", label: "Mijoz" },
-];
+const NAV = [
+  { to: "/statistics", label: "Statistika", icon: "▣" },
+  { to: "/reports", label: "Hisobotlar", icon: "▤" },
+  { to: "/products", label: "Mahsulotlar", icon: "▦" },
+  { to: "/categories", label: "Kategoriyalar", icon: "▥" },
+  { to: "/return", label: "Qaytgan mahsulotlar", icon: "↩" },
+  { to: "/debts", label: "Qarzdorlik", icon: "◎" },
+  { to: "/store", label: "Ombor", icon: "⌂" },
+  { to: "/deliver", label: "Ta‘minotchi", icon: "⏚" },
+  { to: "/clients", label: "Mijozlar", icon: "◎" },
+  { to: "/users", label: "Xodimlar", icon: "◉" },
+  { to: "/currency", label: "Pul birliklar", icon: "⟡" },
+] as const;
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
   const { pathname } = useLocation();
+  const [drawer, setDrawer] = useState(false);
   const [apiOk, setApiOk] = useState<boolean | null>(null);
+
+  const closeDrawer = useCallback(() => setDrawer(false), []);
+  const openDrawer = useCallback(() => setDrawer(true), []);
+
+  useEffect(() => {
+    // Marshrut o‘zgaganda (orqaga / link) yon menyu yopilishi.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- bitta UI qadami: surib chiqilgan drawer
+    setDrawer(false);
+  }, [pathname]);
 
   useEffect(() => {
     let c = true;
@@ -32,49 +44,116 @@ export default function AppLayout() {
       .catch((e) => {
         if (c) {
           setApiOk(false);
-          // eslint-disable-next-line no-console
-          console.warn("auth-user-check:", unwrapError(e));
+          if (import.meta.env.DEV) {
+            console.warn("auth-user-check:", unwrapError(e));
+          }
         }
       });
     return () => {
       c = false;
     };
-  }, [pathname]);
+  }, []);
+
+  useEffect(() => {
+    if (!drawer) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDrawer(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [drawer]);
+
+  const initials = (user?.user_name || "?").slice(0, 1).toUpperCase();
 
   return (
     <div className="app-shell">
-      <header className="top">
-        <div>
-          <strong>Melissa</strong>
-          <div className="sub">
-            {user?.user_name ?? "—"}{" "}
-            {apiOk === null ? "…" : apiOk ? "" : ""}
-            <span className="role">{user?.user_role ?? ""}</span>
+      <div className="m-appbar-wrap">
+        <div
+          className={`m-appbar${apiOk === false ? " m-appbar--warn" : ""}`.trim()}
+        >
+          <button
+            type="button"
+            className="m-appbar__menu"
+            aria-label="Menyu"
+            onClick={openDrawer}
+          >
+            ☰
+          </button>
+          <div className="m-appbar__spacer" />
+          <div className="m-appbar__user">
+            <div className="m-appbar__name">{user?.user_name ?? "—"}</div>
+            <div className="m-appbar__role">{user?.user_role ?? ""}</div>
+          </div>
+          <div className="m-appbar__avatar" aria-hidden>
+            {initials}
           </div>
         </div>
-        <button type="button" className="linkbtn" onClick={logout}>
-          Chiqish
-        </button>
-      </header>
-
-      <div className="content-scroll">
-        <Outlet />
       </div>
 
-      <nav className="bottomnav" aria-label="Asosiy">
-        {nav.map((n) => (
-          <NavLink
-            key={n.to}
-            to={n.to}
-            className={({ isActive }) =>
-              `navlink${isActive ? " navlink--on" : ""}`
-            }
+      {drawer ? (
+        <div
+          className="m-drawer-backdrop"
+          role="presentation"
+          onClick={closeDrawer}
+        />
+      ) : null}
+      <aside
+        className={`m-drawer${drawer ? " m-drawer--open" : ""}`}
+        aria-hidden={!drawer}
+        inert={!drawer ? true : undefined}
+        aria-label="Yon menyu"
+      >
+        <div className="m-drawer__head">
+          <span>Melissa-Store</span>
+          <button type="button" onClick={closeDrawer} aria-label="Yopish">
+            ×
+          </button>
+        </div>
+        <nav className="m-drawer__nav" aria-label="Asosiy menyu">
+          {NAV.map((n) => (
+            <NavLink
+              key={n.to}
+              to={n.to}
+              className={({ isActive }) =>
+                `m-drawer__link${isActive ? " m-drawer__link--active" : ""}`
+              }
+              onClick={closeDrawer}
+            >
+              <span className="m-drawer__ic" aria-hidden>
+                {n.icon}
+              </span>
+              {n.label}
+            </NavLink>
+          ))}
+        </nav>
+        <div className="m-drawer__foot">
+          <button
+            type="button"
+            className="m-drawer__link m-drawer__logout"
+            onClick={() => {
+              closeDrawer();
+              logout();
+            }}
           >
-            {n.label}
-          </NavLink>
-        ))}
-      </nav>
-      <div className="tma-pad" />
+            <span className="m-drawer__ic" aria-hidden>
+              ⎋
+            </span>
+            Chiqish
+          </button>
+        </div>
+      </aside>
+
+      <div className="content-scroll">
+        <Suspense
+          fallback={
+            <div className="page">
+              <LoadingBlock />
+            </div>
+          }
+        >
+          <Outlet />
+        </Suspense>
+      </div>
     </div>
   );
 }
